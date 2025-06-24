@@ -1,1 +1,15 @@
-.vs
+# Visual Studio files
+.vs/
+*.user
+*.suo
+*.sdf
+*.opensdf
+
+# Build files
+[Dd]ebug/
+[Rr]elease/
+x64/
+x86/
+*.pdb
+*.ilk
+*.log 
