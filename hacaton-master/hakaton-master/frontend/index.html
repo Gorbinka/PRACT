@@ -1,0 +1,191 @@
+<!doctype html>
+<html lang="ru">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Прогресс - Микросервис</title>
+    <link rel="stylesheet" href="style.css" />
+    <!-- Подключаем иконки FontAwesome для меню -->
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css"
+    />
+  </head>
+  <body>
+    <div class="app-container">
+      <!-- Шапка с системной строкой и заголовком -->
+      <header class="header">
+        <div class="status-bar">
+          <span class="time">10:37</span>
+          <div class="status-icons">
+            <i class="fas fa-signal"></i>
+            <span class="lte">LTE</span>
+            <i class="fas fa-battery-full"></i>
+          </div>
+        </div>
+        <h1 class="page-title">Прогресс</h1>
+        <div class="toggle-switch">
+          <button id="btn-was" class="toggle-btn">Было</button>
+          <button id="id-now" class="toggle-btn active">Стало</button>
+          <button id="btn-goal" class="toggle-btn">Цель</button>
+        </div>
+      </header>
+
+      <!-- Секция с силуэтом и показателями -->
+      <!-- Секция с контентом, который будет меняться -->
+      <section id="main-content" class="content-section">
+        
+        <!-- Контент для БЫЛО / СТАЛО (по умолчанию) -->
+        <div id="view-stats" class="view-container active">
+          <div class="body-visualization">
+            <div class="silhouette-container">
+    <svg viewBox="0 0 200 400" class="silhouette-svg">
+        <!-- Контур тела -->
+        <path d="M100,20 C110,20 120,30 120,45 C120,60 110,70 100,70 C90,70 80,60 80,45 C80,30 90,20 100,20 M100,75 C80,75 60,90 50,120 L40,200 L55,200 L65,130 L75,130 L75,380 L95,380 L95,220 L105,220 L105,380 L125,380 L125,130 L135,130 L145,200 L160,200 L150,120 C140,90 120,75 100,75" 
+              fill="none" stroke="#2ecc71" stroke-width="1.5" stroke-dasharray="4,4" />
+        
+        <!-- Кольца замера (Эллипсы) -->
+        <ellipse id="zone-chest" cx="100" cy="130" rx="35" ry="8" class="body-zone" /> <!-- Грудь -->
+        <ellipse id="zone-waist" cx="100" cy="165" rx="25" ry="6" class="body-zone" /> <!-- Талия -->
+        <ellipse id="zone-hips" cx="100" cy="195" rx="32" ry="8" class="body-zone" />  <!-- Бедра -->
+    </svg>
+</div>
+
+
+            <div id="stats-container" class="stats-list">
+              <!-- Сюда JS вставит цифры -->
+            </div>
+          </div>
+          <div class="nav-arrows">
+            <i class="fas fa-chevron-left"></i>
+            <i class="fas fa-chevron-right"></i>
+          </div>
+        </div>
+
+        <!-- Контент для ЦЕЛЬ (новый макет с уровнями) -->
+        <div id="view-goal" class="view-container">
+          <div class="levels-container">
+            <div class="levels-row">
+    <!-- Уровень 1: Худой -->
+    <div class="level-item">
+        <div class="silhouette-wrapper">
+            <svg viewBox="0 0 100 200" class="level-svg">
+                <defs><mask id="m1"><rect id="fill-1" x="0" y="200" width="100" height="200" fill="white"/></mask></defs>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C42,48 35,55 30,70 L25,110 L33,110 L38,75 L42,75 L42,190 L48,190 L48,120 L52,120 L52,190 L58,190 L58,75 L62,75 L67,110 L75,110 L70,70 C65,55 58,48 50,48" fill="none" stroke="#2ecc71" stroke-width="1" stroke-dasharray="2,2"/>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C42,48 35,55 30,70 L25,110 L33,110 L38,75 L42,75 L42,190 L48,190 L48,120 L52,120 L52,190 L58,190 L58,75 L62,75 L67,110 L75,110 L70,70 C65,55 58,48 50,48" fill="#2ecc71" mask="url(#m1)"/>
+            </svg>
+        </div>
+        <span>Уровень 1</span>
+    </div>
+
+    <!-- Уровень 2: Обычный -->
+    <div class="level-item">
+        <div class="silhouette-wrapper">
+            <svg viewBox="0 0 100 200" class="level-svg">
+                <defs><mask id="m2"><rect id="fill-2" x="0" y="200" width="100" height="200" fill="white"/></mask></defs>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C40,48 30,55 25,70 L20,110 L28,110 L33,75 L38,75 L38,190 L48,190 L48,115 L52,115 L52,190 L62,190 L62,75 L67,75 L72,110 L80,110 L75,70 C70,55 60,48 50,48" fill="none" stroke="#2ecc71" stroke-width="1" stroke-dasharray="2,2"/>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C40,48 30,55 25,70 L20,110 L28,110 L33,75 L38,75 L38,190 L48,190 L48,115 L52,115 L52,190 L62,190 L62,75 L67,75 L72,110 L80,110 L75,70 C70,55 60,48 50,48" fill="#2ecc71" mask="url(#m2)"/>
+            </svg>
+        </div>
+        <span>Уровень 2</span>
+    </div>
+
+    <!-- Уровень 3: Спортивный -->
+    <div class="level-item">
+        <div class="silhouette-wrapper">
+            <svg viewBox="0 0 100 200" class="level-svg">
+                <defs><mask id="m3"><rect id="fill-3" x="0" y="200" width="100" height="200" fill="white"/></mask></defs>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C38,48 28,55 22,70 L15,110 L25,110 L30,75 L38,75 L38,190 L48,190 L48,110 L52,110 L52,190 L62,190 L62,75 L70,75 L75,110 L85,110 L78,70 C72,55 62,48 50,48" fill="none" stroke="#2ecc71" stroke-width="1" stroke-dasharray="2,2"/>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C38,48 28,55 22,70 L15,110 L25,110 L30,75 L38,75 L38,190 L48,190 L48,110 L52,110 L52,190 L62,190 L62,75 L70,75 L75,110 L85,110 L78,70 C72,55 62,48 50,48" fill="#2ecc71" mask="url(#m3)"/>
+            </svg>
+        </div>
+        <span>Уровень 3</span>
+    </div>
+
+    <!-- Уровень 4: Атлетичный -->
+    <div class="level-item">
+        <div class="silhouette-wrapper">
+            <svg viewBox="0 0 100 200" class="level-svg">
+                <defs><mask id="m4"><rect id="fill-4" x="0" y="200" width="100" height="200" fill="white"/></mask></defs>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C35,48 25,55 18,70 L10,110 L22,110 L28,75 L38,75 L38,190 L48,190 L48,105 L52,105 L52,190 L62,190 L62,75 L72,75 L78,110 L90,110 L82,70 C75,55 65,48 50,48" fill="none" stroke="#2ecc71" stroke-width="1" stroke-dasharray="2,2"/>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C35,48 25,55 18,70 L10,110 L22,110 L28,75 L38,75 L38,190 L48,190 L48,105 L52,105 L52,190 L62,190 L62,75 L72,75 L78,110 L90,110 L82,70 C75,55 65,48 50,48" fill="#2ecc71" mask="url(#m4)"/>
+            </svg>
+        </div>
+        <span>Уровень 4</span>
+    </div>
+
+    <!-- Уровень 5: Мускулистый -->
+    <div class="level-item">
+        <div class="silhouette-wrapper">
+            <svg viewBox="0 0 100 200" class="level-svg">
+                <defs><mask id="m5"><rect id="fill-5" x="0" y="200" width="100" height="200" fill="white"/></mask></defs>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C32,48 20,55 15,70 L5,110 L20,110 L25,75 L35,75 L35,190 L48,190 L48,100 L52,100 L52,190 L65,190 L65,75 L75,75 L80,110 L95,110 L85,70 C80,55 68,48 50,48" fill="none" stroke="#2ecc71" stroke-width="1" stroke-dasharray="2,2"/>
+                <path d="M50,20 C55,20 60,25 60,32 C60,40 55,45 50,45 C45,45 40,40 40,32 C40,25 45,20 50,20 M50,48 C32,48 20,55 15,70 L5,110 L20,110 L25,75 L35,75 L35,190 L48,190 L48,100 L52,100 L52,190 L65,190 L65,75 L75,75 L80,110 L95,110 L85,70 C80,55 68,48 50,48" fill="#2ecc71" mask="url(#m5)"/>
+            </svg>
+        </div>
+        <span>Уровень 5</span>
+    </div>
+</div>
+
+            <div class="progress-section">
+              <p class="progress-label">До следующего уровня:</p>
+              <div class="progress-bar-container">
+                <div class="progress-fill" style="width: 25%">25%</div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Фильтры (Вес, Калории и т.д. ) -->
+      <section class="metric-filters">
+        <button class="filter-btn active">Вес</button>
+        <button class="filter-btn">Калории</button>
+        <button class="filter-btn">Движение</button>
+        <button class="filter-btn">Шаги</button>
+      </section>
+
+      <!-- Секция с графиком -->
+      <section class="chart-container">
+        <div class="chart-card">
+          <div class="y-axis">
+            <span>55</span><span>50</span><span>45</span><span>40</span>
+          </div>
+          <div class="chart-area">
+            <div class="grid-lines"></div>
+            <div class="data-point" style="left: 35%; bottom: 60%"></div>
+            <div
+              class="data-line"
+              style="left: 35%; bottom: 60%; width: 55%"
+            ></div>
+          </div>
+          <div class="x-axis">
+            <span>Пн</span><span>Вт</span><span class="active">Ср</span
+            ><span>Чт</span><span>Пт</span><span class="highlight">Сб</span
+            ><span>Вс</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Нижнее меню -->
+      <nav class="bottom-nav">
+        <div class="nav-item">
+          <i class="far fa-user"></i><span>Профиль</span>
+        </div>
+        <div class="nav-item">
+          <i class="far fa-edit"></i><span>Дневник</span>
+        </div>
+        <div class="nav-item">
+          <i class="far fa-comment"></i><span>Чат</span>
+        </div>
+        <div class="nav-item active">
+          <i class="fas fa-chart-bar"></i><span>Прогресс</span>
+        </div>
+        <div class="nav-item">
+          <i class="far fa-play-circle"></i><span>Видео</span>
+        </div>
+      </nav>
+    </div>
+    <script src="script.js"></script>
+  </body>
+</html>
