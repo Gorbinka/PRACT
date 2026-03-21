@@ -1,173 +1,85 @@
 const data = {
-    was: [
-        { label: "Вес", value: "85кг", color: "green" },
-        { label: "Рост", value: "175см", color: "green" },
-        { label: "Грудь", value: "95см", color: "green" },
-        { label: "Талия", value: "90см", color: "pink" },
-        { label: "Бедра", value: "85см", color: "green" },
-        { label: "Жир", value: "30%", color: "green" }
-    ],
-    now: [
-        { label: "Вес", value: "70кг", color: "green" },
-        { label: "Рост", value: "175см", color: "green" },
-        { label: "Грудь", value: "85см", color: "green" },
-        { label: "Талия", value: "75см", color: "pink" },
-        { label: "Бедра", value: "75см", color: "green" },
-        { label: "Жир", value: "20%", color: "green" }
-    ]
+    was: [{l:"Вес",v:"85кг"},{l:"Рост",v:"175см"},{l:"Грудь",v:"95см"},{l:"Талия",v:"90см"},{l:"Бедра",v:"85см"},{l:"Жир",v:"30%"}],
+    now: [{l:"Вес",v:"70кг"},{l:"Рост",v:"175см"},{l:"Грудь",v:"85см"},{l:"Талия",v:"75см"},{l:"Бедра",v:"75см"},{l:"Жир",v:"20%"}]
 };
 
+// Переключение экранов (Прогресс / Чат)
+const navChat = document.getElementById('nav-chat');
+const navProgress = document.getElementById('nav-progress');
+const screenChat = document.getElementById('screen-chat');
+const screenProgress = document.getElementById('screen-progress');
+
+navChat.onclick = () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    navChat.classList.add('active');
+    screenProgress.classList.remove('active');
+    screenChat.classList.add('active');
+};
+
+navProgress.onclick = () => {
+    document.querySelectorAll('.nav-item').forEach(i => i.classList.remove('active'));
+    navProgress.classList.add('active');
+    screenChat.classList.remove('active');
+    screenProgress.classList.add('active');
+};
+
+// Логика Прогресса (Было / Стало / Цель)
 const statsContainer = document.getElementById('stats-container');
-const buttons = document.querySelectorAll('.toggle-btn');
 const viewStats = document.getElementById('view-stats');
 const viewGoal = document.getElementById('view-goal');
 
-function renderStats(state) {
-    const items = data[state];
-    if (!items) return;
-    
-    statsContainer.innerHTML = items.map(item => {
-        const zoneId = getZoneId(item.label);
-        // Добавляем класс interactive только для нужных параметров
-        const isInteractive = zoneId !== null;
-        
-        return `
-            <div class="stat-item ${isInteractive ? 'interactive' : ''}" 
-                 data-zone="${zoneId || ''}" 
-                 onclick="${isInteractive ? 'selectZone(this)' : ''}">
-                <span class="dot"></span> 
-                ${item.label}: ${item.value}
-            </div>
-        `;
+function renderStats(type) {
+    statsContainer.innerHTML = data[type].map(item => {
+        const isInt = ["Грудь","Талия","Бедра"].includes(item.l);
+        return `<div class="stat-item ${isInt?'int':''}" onclick="selZone(this, '${item.l}')"><span class="dot"></span>${item.l}: ${item.v}</div>`;
     }).join('');
 }
 
-function getZoneId(label) {
-    if (label.includes("Грудь")) return "zone-chest";
-    if (label.includes("Талия")) return "zone-waist";
-    if (label.includes("Бедра")) return "zone-hips";
-    return null; // Остальные параметры не интерактивны
+function selZone(el, label) {
+    if (!["Грудь","Талия","Бедра"].includes(label)) return;
+    const id = label==="Грудь"?"zone-chest":label==="Талия"?"zone-waist":"zone-hips";
+    const zone = document.getElementById(id);
+    const wasAct = el.classList.contains('active');
+    document.querySelectorAll('.stat-item, .body-zone').forEach(x => x.classList.remove('active'));
+    if (!wasAct) { el.classList.add('active'); zone.classList.add('active'); }
 }
 
-function selectZone(element) {
-    const zoneId = element.getAttribute('data-zone');
-    const zoneElement = document.getElementById(zoneId);
-    
-    // Проверяем, нажат ли уже этот элемент
-    const isAlreadyActive = element.classList.contains('active');
-
-    // 1. Сначала в любом случае сбрасываем ВСЕ активные классы
-    document.querySelectorAll('.stat-item').forEach(item => item.classList.remove('active'));
-    document.querySelectorAll('.body-zone').forEach(zone => zone.classList.remove('active'));
-
-    // 2. Если элемент НЕ был активен — активируем его
-    // Если БЫЛ активен — мы его уже сбросили шагом выше (эффект выключения)
-    if (!isAlreadyActive) {
-        element.classList.add('active');
-        if (zoneElement) {
-            zoneElement.classList.add('active');
-        }
-    }
-}
-
-function updateGoalProgress(totalPercent) {
-    // Обновляем текстовое значение в баре
-    const progressFill = document.querySelector('.progress-fill');
-    if (progressFill) {
-        progressFill.style.width = totalPercent + '%';
-        progressFill.innerText = totalPercent + '%';
-    }
-
-    // Распределяем проценты по 5 человечкам (каждый по 20%)
-    for (let i = 1; i <= 5; i++) {
-        const maskRect = document.getElementById(`fill-${i}`);
-        if (!maskRect) continue;
-
-        let levelPercent = 0;
-        const minRange = (i - 1) * 20;
-        const maxRange = i * 20;
-
-        if (totalPercent >= maxRange) {
-            levelPercent = 100; // Полностью закрашен
-        } else if (totalPercent > minRange) {
-            // Частично закрашен: вычисляем долю внутри этих 20%
-            levelPercent = ((totalPercent - minRange) / 20) * 100;
-        } else {
-            levelPercent = 0; // Пустой
-        }
-
-        // В SVG маске y=200 - пусто, y=0 - полно. 
-        // Инвертируем процент в координату Y
-        const yValue = 200 - (levelPercent * 2); 
-        maskRect.setAttribute('y', yValue);
-    }
-}
-
-// Вызовите эту функцию при клике на кнопку "Цель"
-// Например, внутри обработчика клика:
-// if (btn.id === 'btn-goal') updateGoalProgress(35);
-
-
-// Обновите вызов функции
-updateGoalProgress(35); 
-
-// И в самой функции script.js измените расчет для масок:
-function updateGoalProgress(totalPercent) {
-    const progressFill = document.querySelector('.progress-fill');
-    if (progressFill) {
-        progressFill.style.width = totalPercent + '%';
-        progressFill.innerText = totalPercent + '%';
-    }
-
-    // Используем визуальный коэффициент, чтобы закрашивалось чуть меньше
-    const visualPercent = totalPercent * 0.8; // Уменьшаем визуальную закраску
-
-    for (let i = 1; i <= 5; i++) {
-        const maskRect = document.getElementById(`fill-${i}`);
-        if (!maskRect) continue;
-
-        let levelPercent = 0;
-        const minRange = (i - 1) * 20;
-        const maxRange = i * 20;
-
-        if (visualPercent >= maxRange) {
-            levelPercent = 100;
-        } else if (visualPercent > minRange) {
-            levelPercent = ((visualPercent - minRange) / 20) * 100;
-        } else {
-            levelPercent = 0;
-        }
-
-        const yValue = 200 - (levelPercent * 2); 
-        maskRect.setAttribute('y', yValue);
-    }
-}
-
-
-
-
-
-
-buttons.forEach(btn => {
-    btn.addEventListener('click', () => {
-        buttons.forEach(b => b.classList.remove('active'));
+document.querySelectorAll('.toggle-btn').forEach(btn => {
+    btn.onclick = () => {
+        document.querySelectorAll('.toggle-btn').forEach(b => b.classList.remove('active'));
         btn.classList.add('active');
-
         if (btn.id === 'btn-goal') {
-            // Показываем вид "ЦЕЛЬ"
-            viewStats.classList.remove('active');
-            viewGoal.classList.add('active');
+            viewStats.classList.remove('active'); viewGoal.classList.add('active');
+            updateGoal(28); // 28% - закраска второго до бедер
         } else {
-            // Показываем вид "БЫЛО/СТАЛО"
-            viewGoal.classList.remove('active');
-            viewStats.classList.add('active');
-            const state = btn.id === 'btn-was' ? 'was' : 'now';
-            renderStats(state);
+            viewGoal.classList.remove('active'); viewStats.classList.add('active');
+            renderStats(btn.id === 'btn-was' ? 'was' : 'now');
         }
-    });
+    };
 });
 
+// Закрашивание уровней в "Цели"
+function updateGoal(pct) {
+    const progressFill = document.querySelector('.progress-fill');
+    if (progressFill) { progressFill.style.width = '35%'; progressFill.innerText = '35%'; }
 
+    for (let i = 1; i <= 5; i++) {
+        const maskRect = document.getElementById(`fill-${i}`);
+        if (!maskRect) continue;
+        let lp = Math.min(100, Math.max(0, (pct - (i-1)*20) * 5));
+        maskRect.setAttribute('y', 200 - (lp * 2));
+    }
+}
 
-// Инициализация
+// Чат
+const chatInput = document.getElementById('chat-input');
+const chatMessages = document.getElementById('chat-messages');
+document.getElementById('send-btn').onclick = () => {
+    if (!chatInput.value.trim()) return;
+    chatMessages.innerHTML += `<div class="message user"><div class="message-bubble">${chatInput.value}</div></div>`;
+    chatInput.value = "";
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+};
+
+// Старт
 renderStats('now');
